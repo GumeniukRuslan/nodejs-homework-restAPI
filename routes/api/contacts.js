@@ -34,7 +34,7 @@ router.post('/', async (req, res, next) => {
     if (error.details[0].type === "any.required") {
       return res.status(400).send({ message: `missing required ${error.details[0].path[0]} field` });
     }
-    return res.status(400).json(error.details[0].message);
+    return res.status(400).send({ message: error.details[0].message});
   }
   const newContact = {
     id: nanoid(),
@@ -56,7 +56,7 @@ router.put('/:contactId', async (req, res, next) => {
     if (error.details[0].type === "any.required") {
       return res.status(400).send({ message: `missing required ${error.details[0].path[0]} field` });
     }
-    return res.status(400).json(error.details[0].message);
+    return res.status(400).send({ message: error.details[0].message});
   }
   const newContact = {
     ...req.body
