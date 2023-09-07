@@ -12,4 +12,6 @@ router.post('/', ContactsController.postNew)
 
 router.put('/:contactId', ContactsController.putOne)
 
+router.patch('/:contactId/favorite', ContactsController.updateStatusContact)
+
 module.exports = router
