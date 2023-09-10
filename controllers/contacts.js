@@ -21,7 +21,7 @@ async function getById (req, res, next) {
   }
   try {
     const doc = await Contact.findById(contactId).exec();
-    if (!doc || doc.owner !== req.user.id) { 
+    if (!doc || doc.owner.toString() !== req.user.id) { 
       return res.status(404).send({ message: 'Not found' })
     }
     res.status(200).send(doc);
@@ -36,8 +36,8 @@ async function deleteOne (req, res, next) {
       return res.status(400).send({ message: 'Invalid ID' });
   }
   try {
-    const doc = await Contact.find(contactId).exec();
-    if (!doc || doc.owner !== req.user.id) { 
+    const doc = await Contact.findById(contactId).exec();
+    if (!doc || doc.owner.toString() !== req.user.id) { 
       return res.status(404).send({ message: 'Not found' })
     }
     await Contact.findByIdAndDelete(contactId).exec();
@@ -116,7 +116,7 @@ async function updateStatusContact (req, res, next) {
     ...req.body
   }
   const doc = await Contact.findByIdAndUpdate(contactId, newContact, { new: true }).exec();
-  if (!doc || doc.owner !== req.user.id) {
+  if (!doc || doc.owner.toString() !== req.user.id) {
     return res.status(404).send({ message: 'Not found' })
   }
   return res.status(200).send(doc);

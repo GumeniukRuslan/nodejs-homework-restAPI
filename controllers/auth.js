@@ -50,7 +50,7 @@ async function login (req, res, next) {
       return res.status(401).send({ message: "Email or password is wrong" });
     }
 
-    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET, { expiresIn: 3600 });
+    const token = jwt.sign({ id: user._id }, process.env.JWT_SECRET);
     
     await User.findByIdAndUpdate(user._id, { token }).exec();
 
