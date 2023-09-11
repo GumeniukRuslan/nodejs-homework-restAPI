@@ -4,7 +4,12 @@ const mongoose = require('mongoose');
 
 async function readAll(req, res, next) {
   try {
-    const doc = await Contact.find({ owner: req.user.id }).exec();
+    console.log(req.query)
+    const query = { owner: req.user.id };
+    if (req.query.favorite) {
+        query.favorite = req.query.favorite;
+    }
+    const doc = await Contact.find(query).exec();
     if (!doc.length) {
       return res.status(404).send({ message: 'You don`t have any contacts' });
     }
@@ -58,7 +63,6 @@ async function postNew (req, res, next) {
   console.log(req.user)
   const newContact = {
     ...req.body,
-    favorite: true,
     owner: req.user._id,
   }
   try {

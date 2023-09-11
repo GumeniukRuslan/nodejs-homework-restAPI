@@ -18,7 +18,7 @@ async function authCheck(req, res, next) {
     req.user = user;
       next();
     } catch (e) {
-        next(e)
+        return res.status(401).send({ message: "Not authorized" });
     }
   };
 

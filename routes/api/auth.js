@@ -12,4 +12,8 @@ router.post("/logout", authCheck, AuthController.logout);
 
 router.post("/logout", authCheck, AuthController.logout);
 
+router.get("/current", authCheck, AuthController.currentCheck);
+
+router.patch("/", authCheck, AuthController.updSubStatus);
+
 module.exports = router;

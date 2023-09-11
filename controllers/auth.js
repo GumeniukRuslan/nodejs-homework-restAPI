@@ -1,11 +1,11 @@
 const bcrypt = require("bcrypt");
-const usersSchema = require('../schemas/users');
+const usersSchemas = require('../schemas/users');
 const User = require('../models/user');
 const jwt = require("jsonwebtoken");
 
 async function register(req, res, next) {
   const { email, password } = req.body;
-  const { error } = usersSchema.validate(req.body)
+  const { error } = usersSchemas.usersSchema.validate(req.body)
   if (error) {
     if (error.details[0].type === "any.required") {
       return res.status(400).send({ message: `missing required ${error.details[0].path[0]} field` });
@@ -31,7 +31,7 @@ async function register(req, res, next) {
 
 async function login (req, res, next) {
   const { email, password } = req.body;
-  const { error } = usersSchema.validate(req.body)
+  const { error } = usersSchemas.usersSchema.validate(req.body)
   if (error) {
     if (error.details[0].type === "any.required") {
       return res.status(400).send({ message: `missing required ${error.details[0].path[0]} field` });
@@ -70,8 +70,31 @@ async function logout(req, res, next) {
   res.status(204).send()
 }
 
+function currentCheck(req, res, next) {
+  const { email, subscription } = req.user;
+  
+  res.status(200).json({email, subscription});
+};
+
+async function updSubStatus(req, res, next) {
+  const { error } = usersSchemas.subUpdSchema.validate(req.body)
+
+  if (!Object.keys(req.body).length) { 
+    return res.status(400).send({ message: `missing field subscription` });
+  }
+  if (error) {
+    return res.status(400).send({ message: error.details[0].message});
+  }
+  
+  const doc = await User.findOneAndUpdate({email: req.user.email}, req.body, { new: true }).exec();
+
+  return res.status(200).send(doc);
+}
+
 module.exports = {
   register,
   login,
-  logout
+  logout,
+  currentCheck, 
+  updSubStatus
 }
