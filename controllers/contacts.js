@@ -1,12 +1,19 @@
 const contactsSchemas = require('../schemas/contacts');
 const Contact = require('../models/contacts');
 const mongoose = require('mongoose');
-console.log(Contact)
 
 async function readAll(req, res, next) {
   try {
-    const docs = await Contact.find().exec();
-    res.status(200).send(docs);
+    console.log(req.query)
+    const query = { owner: req.user.id };
+    if (req.query.favorite) {
+        query.favorite = req.query.favorite;
+    }
+    const doc = await Contact.find(query).exec();
+    if (!doc.length) {
+      return res.status(404).send({ message: 'You don`t have any contacts' });
+    }
+    res.status(200).send(doc);
   } catch (error) {
     next(error);
   }
@@ -18,11 +25,11 @@ async function getById (req, res, next) {
       return res.status(400).send({ message: 'Invalid ID' });
   }
   try {
-    const docs = await Contact.findById(contactId).exec();
-    if (!docs) { 
+    const doc = await Contact.findById(contactId).exec();
+    if (!doc || doc.owner.toString() !== req.user.id) { 
       return res.status(404).send({ message: 'Not found' })
     }
-    res.status(200).send(docs);
+    res.status(200).send(doc);
   } catch (error) {
     next(error);
   }
@@ -34,10 +41,11 @@ async function deleteOne (req, res, next) {
       return res.status(400).send({ message: 'Invalid ID' });
   }
   try {
-    const docs = await Contact.findByIdAndDelete(contactId).exec();
-    if (!docs) { 
+    const doc = await Contact.findById(contactId).exec();
+    if (!doc || doc.owner.toString() !== req.user.id) { 
       return res.status(404).send({ message: 'Not found' })
     }
+    await Contact.findByIdAndDelete(contactId).exec();
     res.status(200).send({ message: 'contact deleted' })
   } catch (error) {
     next(error);
@@ -52,13 +60,14 @@ async function postNew (req, res, next) {
     }
     return res.status(400).send({ message: error.details[0].message});
   }
+  console.log(req.user)
   const newContact = {
     ...req.body,
-    favorite: false
+    owner: req.user._id,
   }
   try {
-    const docs = await Contact.create(newContact);
-    res.status(201).send(docs);
+    const doc = await Contact.create(newContact);
+    res.status(201).send(doc);
   } catch (error) {
     next(error);
   }
@@ -111,7 +120,7 @@ async function updateStatusContact (req, res, next) {
     ...req.body
   }
   const doc = await Contact.findByIdAndUpdate(contactId, newContact, { new: true }).exec();
-  if (!doc) {
+  if (!doc || doc.owner.toString() !== req.user.id) {
     return res.status(404).send({ message: 'Not found' })
   }
   return res.status(200).send(doc);

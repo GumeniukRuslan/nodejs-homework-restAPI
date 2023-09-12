@@ -1,17 +1,18 @@
 const express = require('express')
 const router = express.Router()
+const authCheck = require("../../middlewares/authCheck.js");
 const ContactsController = require('../../controllers/contacts.js')
 
-router.get('/', ContactsController.readAll)
+router.get('/', authCheck, ContactsController.readAll)
 
-router.get('/:contactId', ContactsController.getById)
+router.get('/:contactId', authCheck, ContactsController.getById)
 
-router.delete('/:contactId', ContactsController.deleteOne)
+router.delete('/:contactId', authCheck, ContactsController.deleteOne)
 
-router.post('/', ContactsController.postNew)
+router.post('/', authCheck, ContactsController.postNew)
 
-router.put('/:contactId', ContactsController.putOne)
+router.put('/:contactId', authCheck, ContactsController.putOne)
 
-router.patch('/:contactId/favorite', ContactsController.updateStatusContact)
+router.patch('/:contactId/favorite', authCheck, ContactsController.updateStatusContact)
 
 module.exports = router
