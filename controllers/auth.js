@@ -100,7 +100,7 @@ async function updAvatar(req, res, next) {
     const avatarPath= path.join(__dirname, "..", "public/avatars", req.file.filename)
     await fs.rename(req.file.path, avatarPath);
 
-    const doc = await User.findByIdAndUpdate(req.user.id, { avatarURL: req.file.filename }, { new: true }).exec();
+    const doc = await User.findByIdAndUpdate(req.user.id, { avatarURL: `/avatars/${req.file.filename}` }, { new: true }).exec();
 
     if (doc === null) {
       return res.status(404).send({ message: "User not found" });
@@ -109,7 +109,7 @@ async function updAvatar(req, res, next) {
     const newAvatar = await Jimp.read(avatarPath);
     await newAvatar.resize(250, 250).writeAsync(avatarPath);
     
-    return res.status(200).send({avatarURL: doc.avatarURL});
+    return res.status(200).send({avatarURL: `/avatars/${doc.avatarURL}`});
   } catch (error) {
     next(error);
   }
