@@ -19,4 +19,8 @@ router.patch("/", authCheck, AuthController.updSubStatus);
 
 router.patch("/avatars", [authCheck, downloadAvatar.single("avatar")], AuthController.updAvatar);
 
+router.get("/verify/:verificationToken", AuthController.verification);
+
+router.post("/verify", AuthController.repeatVerification);
+
 module.exports = router;
