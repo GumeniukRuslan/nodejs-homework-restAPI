@@ -1,6 +1,7 @@
 const express = require("express");
 const authCheck = require("../../middlewares/authCheck.js");
 const AuthController = require("../../controllers/auth.js");
+const downloadAvatar = require("../../middlewares/downloadAvatar.js");
 
 const router = express.Router();
 
@@ -15,5 +16,7 @@ router.post("/logout", authCheck, AuthController.logout);
 router.get("/current", authCheck, AuthController.currentCheck);
 
 router.patch("/", authCheck, AuthController.updSubStatus);
+
+router.patch("/avatars", [authCheck, downloadAvatar.single("avatar")], AuthController.updAvatar);
 
 module.exports = router;

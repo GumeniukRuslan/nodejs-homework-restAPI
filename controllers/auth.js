@@ -2,6 +2,10 @@ const bcrypt = require("bcrypt");
 const usersSchemas = require('../schemas/users');
 const User = require('../models/user');
 const jwt = require("jsonwebtoken");
+const gravatar = require('gravatar');
+const fs = require("node:fs/promises");
+const path = require("node:path");
+const Jimp = require("jimp");
 
 async function register(req, res, next) {
   const { email, password } = req.body;
@@ -20,7 +24,7 @@ async function register(req, res, next) {
     }
     const passwordHash = await bcrypt.hash(password, 10);
 
-    await User.create({ email, password: passwordHash });
+    await User.create({ email, password: passwordHash, avatarURL: gravatar.url(email) });
 
     res.status(201).json({ user: {email, password} });
 
@@ -91,10 +95,31 @@ async function updSubStatus(req, res, next) {
   return res.status(200).send(doc);
 }
 
+async function updAvatar(req, res, next) {
+  try {
+    const avatarPath= path.join(__dirname, "..", "public/avatars", req.file.filename)
+    await fs.rename(req.file.path, avatarPath);
+
+    const doc = await User.findByIdAndUpdate(req.user.id, { avatarURL: `/avatars/${req.file.filename}` }, { new: true }).exec();
+
+    if (doc === null) {
+      return res.status(404).send({ message: "User not found" });
+    }
+
+    const newAvatar = await Jimp.read(avatarPath);
+    await newAvatar.resize(250, 250).writeAsync(avatarPath);
+    
+    return res.status(200).send({avatarURL: `/avatars/${doc.avatarURL}`});
+  } catch (error) {
+    next(error);
+  }
+}
+
 module.exports = {
   register,
   login,
   logout,
   currentCheck, 
-  updSubStatus
+  updSubStatus,
+  updAvatar
 }
