@@ -172,7 +172,7 @@ async function repeatVerification(req, res, next) {
 
     await sendVerification({
       to: email,
-      subject: 'Verification',
+      subject: 'Verification (2)',
       html: `
         <p>To confirm your registration, please click on link below</p>
         <p>
